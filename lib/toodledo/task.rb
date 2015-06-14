@@ -54,6 +54,10 @@ module Toodledo
     def num_children
       return @num_children
     end
+	
+	def imp
+	   return @imp
+    end
 
     # TODO Repetitious. Refactor
     def initialize(id, params = {})
@@ -71,7 +75,9 @@ module Toodledo
       @folder = params[:folder]
       @context = params[:context]
       @goal = params[:goal]
-
+	  
+	  @imp = params[:imp]
+	  
       @added = params[:added]
       @modified = params[:modified]
       @completed = params[:completed]
@@ -248,6 +254,9 @@ module Toodledo
       status = Status::NONE if (status == 0)
       
       star = (el.elements['star'].text.to_i == 1)
+	  
+	  
+	  imp = getimp(folder, duedate, priority, star)
       
       params = {
         :parent_id => parent_id,
@@ -270,10 +279,67 @@ module Toodledo
         :note => note,
         :startdate => startdate,
         :status => status,
-        :star => star
+        :star => star,
+		:imp => imp
       }
       return Task.new(id, params)
     end
+	
+	def self.getimp(folder, duedate, priority, star)
+		imp = 2
+		if (duedate != nil)
+			datediff = (duedate - Date.today).to_i
+			if (datediff < 0 )
+			  daydiff = 60
+			elsif (datediff == 0)
+			  daydiff = 50
+			elsif (datediff == 1)
+			  daydiff = 30
+			elsif (datediff > 14)
+			  daydiff = 00
+			elsif (datediff > 7)
+			  daydiff = 10
+			elsif (datediff > 1)
+			  daydiff = 20
+			end
+		else
+			daydiff = 0
+		end
+		imp += daydiff
+		
+		folderwt = 1
+				
+		if ((folder.name <=> "tools") == 0)
+			folderwt = 10
+		end
+		
+		if ((folder.name <=> "pap") == 0)
+			folderwt = 8
+		end
+		
+		 imp += folderwt
+		
+		prioritywt = 1
+		case priority
+		  when Priority::TOP
+            prioritywt = 9
+          when Priority::HIGH
+            prioritywt = 6
+          when Priority::MEDIUM
+            prioritywt = 3
+          when Priority::LOW
+            prioritywt = 1
+          when Priority::NEGATIVE
+            prioritywt = -2
+          else
+            prioritywt = 0
+		end
+		
+		imp += prioritywt
+		
+		
+		return imp
+	end
 
     def to_xml()
       # XXX Need to make this be contextual. #<task>
