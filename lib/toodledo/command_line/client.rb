@@ -329,12 +329,30 @@ module Toodledo
         
         # Highest priority first
         tasks.sort! do |a, b|
-          b.priority <=> a.priority
+          b.imp <=> a.imp
         end
         
-        for task in tasks  
-          print @formatters[:task].format(task)
-        end
+		#mytasks = {}
+		
+		#for task in tasks
+		#  imp = get_imp(task)
+		  
+		#  mytasks[task.server_id] = imp
+		
+		#end
+		
+		
+		#for imptask in mytasks
+		#	for task in tasks  
+		#		if (task.server_id == imptask.server_id)
+		#			print @formatters[:task].format(task)
+		#		end
+		#	end
+		#end
+
+	    for task in tasks 		
+			print @formatters[:task].format(task)
+		end
       end
      
       # 

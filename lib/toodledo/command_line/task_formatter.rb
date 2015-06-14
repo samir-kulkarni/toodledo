@@ -10,31 +10,47 @@ module Toodledo
 
       # Formats the task for a command line.
       def format(task)
-        fancyp = '!' + readable_priority(task.priority)
-  
-        msg = "<#{task.server_id}> -- #{fancyp}"
+        fancyp = readable_priority(task.priority)
+
+        msg = "#{task.server_id} | #{fancyp} |"
   
         # TODO Only include [ ] if needed
-        if (task.folder != Folder::NO_FOLDER)
-          msg += " *[#{task.folder.name}]"
+		 imp  = "#{task.imp}"
+		 msg += " %3.3s |" % imp
+		 
+		 ttl =  "#{task.title}"
+		 msg += " %-45.45s |" % ttl
+		
+		
+		if (task.duedate != nil)
+          fmt = '%d/%m/%Y'
+          msg += " #{readable_duedatemodifier(task.duedatemodifier)}#{task.duedate.strftime(fmt)} |"
+		else
+		  msg += "            |"
         end
-  
+		  
+		
+		if (task.folder != Folder::NO_FOLDER)
+		  fold = "#{task.folder.name}"
+          msg += " %-8.8s |" % fold
+        else
+		  msg += "          |"
+		end
+		
         if (task.context != Context::NO_CONTEXT)
-          msg += " @[#{task.context.name}]"
+		  ctx = "#{task.context.name}"
+          msg += " %-6.6s |" % ctx
+		else
+		  msg += "        |"
         end
   
-        if (task.goal != Goal::NO_GOAL)
-          msg += " ^[#{task.goal.name}]"
-        end
+        #if (task.goal != Goal::NO_GOAL)
+        #  msg += " ^[#{task.goal.name}]"
+        #end
   
-        if (task.repeat != Repeat::NONE)
-          msg += " repeat[#{readable_repeat(task.repeat)}]"
-        end
-  
-        if (task.duedate != nil)
-          fmt = '%m/%d/%Y %I:%M %p'
-          msg += " #[#{readable_duedatemodifier(task.duedatemodifier)}#{task.duedate.strftime(fmt)}]"
-        end
+        msg += " #{readable_repeat(task.repeat)} |"
+		
+        
         
         if (task.startdate != nil)
           fmt = '%m/%d/%Y'
@@ -69,12 +85,27 @@ module Toodledo
           msg += " children[#{task.num_children}]"
         end
         
-        msg += " #{task.title}"
               
-        if (task.note != nil)
-          msg += "\n      #{task.note}"
-        end
-  
+        #if (task.note != nil)
+        #  msg += "\n      #{task.note}"
+        #end
+		
+		case task.priority
+		  when Priority::TOP
+            return red(msg)
+          when Priority::HIGH
+            return pink(msg)
+          when Priority::MEDIUM
+            return yellow(msg)
+          when Priority::LOW
+            return green(msg)
+          when Priority::NEGATIVE
+            return lightblue(msg)
+          else
+            return msg
+		end
+		
+		
         return msg
       end
       
@@ -82,17 +113,17 @@ module Toodledo
       def readable_priority(priority)
         case priority
           when Priority::TOP
-            return 'top'
+            return 'top     '
           when Priority::HIGH
-            return 'high'
+            return 'high    '
           when Priority::MEDIUM
-            return 'medium'
+            return 'medium  '
           when Priority::LOW
-            return 'low'
+            return 'low     '
           when Priority::NEGATIVE
             return 'negative'
           else
-            return ''
+            return '        '
         end
       end
 
@@ -119,21 +150,21 @@ module Toodledo
       def readable_repeat(repeat)
         case repeat
         when Repeat::NONE
-          ''
+          "         "
         when Repeat::WEEKLY
-          "weekly"
+          "weekly   "
         when Repeat::MONTHLY
-          "monthly"
+          "monthly  "
         when Repeat::YEARLY
-          "yearly"
+          "yearly   "
         when Repeat::DAILY
-          "daily"
+          "daily    "
         when Repeat::BIWEEKLY
-          "biweekly"
+          "biweekly "
         when Repeat::BIMONTHLY
           "bimonthly"
         when Repeat::SEMIANNUALLY
-          "semiannually"
+          "6mthly   "
         when Repeat::QUARTERLY
           "quarterly"
         else
@@ -147,29 +178,40 @@ module Toodledo
       def readable_status(status)
         case status
         when Status::NONE
-          'none'
+          'none     '
         when Status::NEXT_ACTION
-          'Next Action'
+          'Nxt Act  '
         when Status::ACTIVE
-          'Active'
+          'Active   '
         when Status::PLANNING
-          'Planning'
+          'Planning '
         when Status::DELEGATED
           'Delegated'
         when Status::WAITING
-          'Waiting'
+          'Waiting  '
         when Status::HOLD
-          'Hold'
+          'Hold     '
         when Status::POSTPONED
           'Postponed'
         when Status::SOMEDAY
-          'Someday'
+          'Someday  '
         when Status::CANCELLED
           'Cancelled'
         when Status::REFERENCE
           'Reference'
         end
       end
+	  
+	  def colorize(text, color_code)
+		"\e[#{color_code}m#{text}\e[0m"
+	  end
+
+	  def red(text); colorize(text, 31); end
+      def green(text); colorize(text, 32); end
+	  def yellow(text); colorize(text, 33); end
+      def blue(text); colorize(text, 34); end
+	  def pink(text); colorize(text, 35); end
+      def lightblue(text); colorize(text, 36); end
     end
   end
 end
