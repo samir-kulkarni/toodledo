@@ -314,9 +314,11 @@ module Toodledo
 		end
 		
 		if ((folder.name <=> "pap") == 0)
+			folderwt = 6
+		end
+		if ((folder.name <=> "pes") == 0)
 			folderwt = 8
 		end
-		
 		 imp += folderwt
 		
 		prioritywt = 1

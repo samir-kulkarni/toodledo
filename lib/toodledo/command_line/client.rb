@@ -29,6 +29,7 @@ require 'toodledo/command_line/list_goals_command'
 # UPDATE
 require 'toodledo/command_line/edit_command'
 require 'toodledo/command_line/complete_command'
+require 'toodledo/command_line/changeoverdue_command'
 
 # DELETE
 require 'toodledo/command_line/delete_command'
@@ -415,7 +416,7 @@ module Toodledo
             print "#{context.name}" if (! tasks.empty?)
             tasks.each { |task| print "  " + @formatters[:task].format(task) }
         end
-      end
+ end
         
       #
       # Lists the goals.  Takes an optional argument of 
@@ -648,6 +649,37 @@ module Toodledo
         
         print "Task #{task_id} edited."
       end
+	  
+	  #
+      # Assign today's due date to all overdue tasks.   
+      #
+      # changeoverdue *Action !top 12345
+      def changeoverdue_task(session, input)  
+		print "test1"
+		
+		before = Date.today
+		after = nil
+		
+		params = { }
+		
+        if (before) 
+          params.merge!({ :before => before.strftime("%Y-%m-%d") })
+        end
+        
+        if (after)
+          params.merge!({ :after =>  after.strftime("%Y-%m-%d") })
+        end
+        
+		tasks = session.get_tasks(params)
+		for task in tasks
+			task_id = task.server_id
+			params = {  }
+			params.merge!({ :duedate => before })
+			session.edit_task(task_id, params)
+        end
+     
+	 end
+	  
       
       # Masks the task as completed.  Uses a task id as argument.
       #
@@ -835,7 +867,12 @@ module Toodledo
           line = clean(/^complete/, input)
           complete_task(session, line)
           
-          when /^tasks/
+          when /^changeoverdue/
+		  print "te1"
+          line = clean(/^(changeoverdue)/, input)
+          changeoverdue_task(session, line)
+		  
+		  when /^tasks/
           line = clean(/^(tasks)/, input)
           list_tasks(session, line)
           
@@ -902,7 +939,7 @@ module Toodledo
         cmd = CmdParse::CommandParser.new(graceful_exception, partial_cmd_matching)
         cmd.program_name = "toodledo"
         cmd.program_version = Toodledo::VERSION
-        
+		
         # Options (must be before help and version are added)
         cmd.options = CmdParse::OptionParserWrapper.new do |opt|
           opt.separator "Global options:"
@@ -918,7 +955,7 @@ module Toodledo
         
         cmd.add_command(ListTasksCommand.new(self))
         
-	cmd.add_command(ListTodayCommand.new(self))
+		cmd.add_command(ListTodayCommand.new(self))
         cmd.add_command(ListTomorrowCommand.new(self))
         cmd.add_command(ListOverdueCommand.new(self))
 
@@ -931,10 +968,11 @@ module Toodledo
         cmd.add_command(DeleteTaskCommand.new(self))
         cmd.add_command(HotlistCommand.new(self))
         cmd.add_command(SetupCommand.new(self))
-                
+		cmd.add_command(ChangeOverdueCommand.new(self))
+		
         cmd.add_command(CmdParse::HelpCommand.new)
         cmd.add_command(CmdParse::VersionCommand.new)
-        
+
         cmd.parse
         
         # Return a good exit status.

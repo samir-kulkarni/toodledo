@@ -37,13 +37,22 @@ module Toodledo
 		  msg += "          |"
 		end
 		
-        if (task.context != Context::NO_CONTEXT)
+     
+		 if (task.startdate != nil)
+          fmt = '%d/%m/%Y'
+          msg += " #{task.startdate.strftime(fmt)} |"
+		else
+			msg += "            |"
+        end
+		
+		
+	    if (task.context != Context::NO_CONTEXT)
 		  ctx = "#{task.context.name}"
           msg += " %-6.6s |" % ctx
 		else
 		  msg += "        |"
         end
-  
+     
         #if (task.goal != Goal::NO_GOAL)
         #  msg += " ^[#{task.goal.name}]"
         #end
@@ -52,21 +61,18 @@ module Toodledo
 		
         
         
-        if (task.startdate != nil)
-          fmt = '%m/%d/%Y'
-          msg += " startdate[#{task.startdate.strftime(fmt)}]"
-        end
+ 
         
         if (task.status != Status::NONE)
-          msg += " status[#{readable_status(task.status)}]"
+          msg += " #{readable_status(task.status)} |"
         end
         
         if (task.star)
-          msg += " starred"
+          msg += " starred |"
         end
   
         if (task.tag != nil)
-          msg += " %[#{task.tag}]"
+          msg += " #{task.tag} |"
         end
         
         if (task.parent_id != nil)
@@ -168,7 +174,7 @@ module Toodledo
         when Repeat::QUARTERLY
           "quarterly"
         else
-          ''
+          '         '
         end
       end
       

@@ -37,6 +37,7 @@ tasks with a BetaBrite?  It can all happen.
     "lib/toodledo/command_line/base_command.rb",
     "lib/toodledo/command_line/client.rb",
     "lib/toodledo/command_line/complete_command.rb",
+	"lib/toodledo/command_line/changeoverdue_command.rb",
     "lib/toodledo/command_line/context_formatter.rb",
     "lib/toodledo/command_line/delete_command.rb",
     "lib/toodledo/command_line/edit_command.rb",

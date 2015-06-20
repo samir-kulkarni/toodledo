@@ -1,6 +1,6 @@
 == 1.4.1
 
-* Forgot to update the manifest.
+* Forgot to update the manifest again...
 
 == 1.4.0
 
